@@ -1,0 +1,130 @@
+Combining queries using bool
+
+GET logs/_search
+
+
+# How Many Web Requests Originate from Either US or CN Where the Response Was Not 200?
+GET logs/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "geo.src": {
+              "value": "US"
+            }
+          }
+        },
+        {
+          "term": {
+            "geo.src": {
+              "value": "CN"
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 1,
+      "must_not": [
+        {
+          "term": {
+            "response.keyword": {
+              "value": 200
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+#How Many Web Requests with a 200 Response and at Least 2 Tags with 'success', 'security', or 'info' Value Are Not from a Machine with a Windows Operating System?
+GET logs/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "response.keyword": {
+              "value": "200"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "success"
+            }
+          }
+        },
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "security"
+            }
+          }
+        },
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "info"
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 2,
+      "must_not": [
+        {
+          "match": {
+            "machine.os": "win"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# How Many Web Requests Were Made for apm-server RPM or DEB Files by Users Using an OS X Operating System? Filter down the results to only include files between 1024 and 8192 bytes without effecting relevancy scoring.
+
+GET logs/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_phrase_prefix": {
+            "request": "apm-server"
+          }
+        },
+        {
+          "terms": {
+            "extension.keyword": [
+              "deb",
+              "rpm"
+            ]
+          }
+        },
+        {
+         "term": {
+           "machine.os.keyword": {
+             "value": "osx"
+           }
+         }
+        }
+      ],
+      "filter": [
+        {
+          "range": {
+            "bytes": {
+              "gte": 1024,
+              "lte": 8192
+            }
+          }
+        }
+      ]
+    }
+  }
+}
