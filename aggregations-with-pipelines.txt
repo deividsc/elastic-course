@@ -1,0 +1,83 @@
+#What Is the Total Distance Travelled per Day and on Which Day was the Most Distance Travelled?
+GET flights/_search
+{
+  "size": 0,
+  "aggs": {
+    "per_day": {
+      "date_histogram": {
+        "field": "timestamp",
+        "calendar_interval": "day"
+      },
+      "aggs": {
+        "distance": {
+          "sum": {
+            "field": "DistanceKilometers"
+          }
+        }
+      }
+    },
+    "max_distance":{
+      "max_bucket": {
+        "buckets_path": "per_day>distance"
+      }
+    }
+  }
+}
+
+#What Is the Cumulative Sum of Flight Delay Time in Minutes per Day?
+GET flights/_search
+{
+  "size": 0,
+  "aggs": {
+    "per_day": {
+      "date_histogram": {
+        "field": "timestamp",
+        "calendar_interval": "day"
+      },
+      "aggs": {
+        "delay": {
+          "sum": {
+            "field": "FlightDelayMin"
+          }
+        },
+        "accumulative": {
+          "cumulative_sum": {
+            "buckets_path": "delay"
+          }
+        }
+      }
+    }
+  }
+}
+
+#What Is the Change in Average Ticket Price per Day and What Is the `min`, `max`, `avg`, and `sum` of That Change?
+
+GET flights/_search
+{
+  "size": 0,
+  "aggs": {
+    "per_day": {
+      "date_histogram": {
+        "field": "timestamp",
+        "calendar_interval": "day"
+      },
+      "aggs": {
+        "average": {
+          "avg": {
+            "field": "AvgTicketPrice"
+          }
+        },
+        "change_avg":{
+          "derivative": {
+            "buckets_path": "average"
+          }
+        }
+      }
+    },
+    "status_avg":{
+      "stats_bucket": {
+        "buckets_path": "per_day>change_avg"
+      }
+    }
+  }
+}
