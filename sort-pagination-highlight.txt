@@ -1,0 +1,109 @@
+
+#Matches all documents from the shakespeare dataset where some form of the word "life" appears in the text_entry field.
+#Paginates the search results with 25 results per page and displays the first page of results.
+#Highlights the matched term(s) with the HTML <em> and </em> tags to emphasize the text.
+#Sorts the results by relevancy score in descending order.
+
+GET shakespeare/_search
+{
+  "from": 0, 
+  "size": 25,
+  "query": {
+    "match": {
+      "text_entry": "life"
+    }
+  },
+  "highlight": {
+    
+    "fields": {
+      "text_entry": {}
+    }
+  }
+}
+
+
+#Matches all documents from the shakespeare dataset where some form of the word "death" appears in the text_entry field.
+#Paginates the search results with 25 results per page and displays the first page of results.
+#Highlights the matched term(s) with the HTML <b> and </b> tags to bold the text.
+#Sorts the results first by play_name.keyword then speaker.keyword in ascending order followed by relevancy score in descending order.
+
+GET shakespeare/_search
+{
+  "from": 0, 
+  "size": 25,
+  "query": {
+    "match": {
+      "text_entry": "death"
+    }
+  },
+  "highlight": {
+    "pre_tags": "<b>",
+    "post_tags": "</b>", 
+    "fields": {
+      "text_entry": {}
+    }
+  },
+  "sort": [
+    {
+      "play_name.keyword": {}
+    },
+    {
+      "speaker.keyword": {}
+    },
+    
+      "_score"
+  ]
+}
+
+#Matches all documents from the shakespeare dataset where the speaker.keyword is "THESEUS" and some form of the word "death" or "life" appears in the text_entry field.
+#Paginates the search results with 10 results per page and displays the first page of results.
+#Highlights the matched term(s) with the HTML <b> and </b> tags and the HTML <mark> and </mark> tags to both bold and highlight the text.
+#Sorts the results by line_id in descending order.
+
+
+
+GET shakespeare/_search
+{
+  "from": 0, 
+  "size": 10,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "speaker.keyword": {
+              "value": "THESEUS"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": {
+            "text_entry": "life"
+          }
+        },
+        {
+          "match": {
+            "text_entry": "death"
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  },
+  "highlight": {
+    "pre_tags": ["<b><mark>"],
+    "post_tags": ["</mark></b>"], 
+    "fields": {
+      "text_entry": {}
+    }
+  },
+  "sort": [
+    {
+      "line_id": {
+        "order": "desc"
+      }
+    }
+  ]
+}
