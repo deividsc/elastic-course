@@ -1,0 +1,104 @@
+GET flights/_search
+{
+  "from": 0,
+  "size": 25, 
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "Carrier": "ES-Air"
+          }
+        },
+        {
+          "wildcard": {
+            "OriginCityName": "Buenos Aires"
+          }
+        },
+        {
+          "wildcard": {
+            "DestCityName": "*"
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "AvgTicketPrice": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+# Develop the following search template: flights_template.
+
+#Paginate the search results with a default page size of 25 and displays the first page by default.
+#Perform a case-insensitive search on the Carrier field with the carrier parameter and is defaulted to search for all carriers.
+#Perform a case-insensitive search on the OriginCityName field with the origin parameter and is defaulted to search for all origin cities.
+#Perform a case-insensitive search on the DestCityName field with the destination parameter and is defaulted to search for all destination cities.
+#Sort the results by the AvgTicketPrice in descending order.
+
+
+POST _scripts/flights_template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "from": "{{from}}{{^from}}0{{/from}}",
+      "size": "{{size}}{{^size}}25{{/size}}",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "wildcard": {
+                "Carrier": "{{carrier}}{{^carrier}}*{{/carrier}}"
+              }
+            },
+            {
+              "wildcard": {
+                "OriginCityName": "{{origin}}{{^origin}}*{{/origin}}"
+              }
+            },
+            {
+              "wildcard": {
+                "DestCityName": "{{destination}}{{^destination}}*{{/destination}}"
+              }
+            }
+          ]
+        }
+      },
+      "sort": [
+        {
+          "AvgTicketPrice": {
+            "order": "desc"
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET _render/template
+{
+  "id": "flights_template",
+  "params": {
+    "from":10,
+    "size": 30,
+    "origin":"Madrid",
+    "carrier":"ES-Air",
+    "destination":"Moscow"
+  }
+}
+
+GET flights/_search/template
+{
+  "id": "flights_template",
+  "params": {
+    "from":0,
+    "size": 30,
+    "origin":"Madrid",
+    "carrier":"ES-Air","destination":"Moscow"
+  }
+}
