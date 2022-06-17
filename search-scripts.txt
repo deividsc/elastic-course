@@ -1,23 +1,32 @@
 GET flights/_search
 {
   "from": 0,
-  "size": 25, 
+  "size": 25,
   "query": {
     "bool": {
       "must": [
         {
           "wildcard": {
-            "Carrier": "ES-Air"
+            "Carrier": {
+              "value": "ES-Air",
+              "case_insensitive": true
+            }
           }
         },
         {
           "wildcard": {
-            "OriginCityName": "Buenos Aires"
+            "OriginCityName": {
+              "value": "Buenos Aires",
+              "case_insensitive": true
+            }
           }
         },
         {
           "wildcard": {
-            "DestCityName": "*"
+            "DestCityName": {
+              "value": "ES-Air",
+              "case_insensitive": true
+            }
           }
         }
       ]
@@ -31,6 +40,7 @@ GET flights/_search
     }
   ]
 }
+
 
 # Develop the following search template: flights_template.
 
@@ -53,17 +63,29 @@ POST _scripts/flights_template
           "must": [
             {
               "wildcard": {
-                "Carrier": "{{carrier}}{{^carrier}}*{{/carrier}}"
+                "Carrier": 
+                {
+              "value": "{{carrier}}{{^carrier}}*{{/carrier}}",
+              "case_insensitive": true
+            }
               }
             },
             {
               "wildcard": {
-                "OriginCityName": "{{origin}}{{^origin}}*{{/origin}}"
+                "OriginCityName": 
+                {
+              "value": "{{origin}}{{^origin}}*{{/origin}}",
+              "case_insensitive": true
+            }
               }
             },
             {
               "wildcard": {
-                "DestCityName": "{{destination}}{{^destination}}*{{/destination}}"
+                "DestCityName": 
+                {
+              "value": "{{destination}}{{^destination}}*{{/destination}}",
+              "case_insensitive": true
+            }
               }
             }
           ]
@@ -99,6 +121,7 @@ GET flights/_search/template
     "from":0,
     "size": 30,
     "origin":"Madrid",
-    "carrier":"ES-Air","destination":"Moscow"
+    "carrier":"ES-Air",
+    "destination":"moscow"
   }
 }
