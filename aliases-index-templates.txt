@@ -1,0 +1,77 @@
+GET _cat/indices?
+
+#Alias 1: The alias sample_data should be applied to the kibana_sample_data_ecommerce, kibana_sample_data_flights, and kibana_sample_data_logs indices.
+
+POST _aliases
+{
+  "actions": [
+    {
+       
+      "add": {
+        "index":"kibana_sample_data_*",
+        "alias": "sample_data"
+      }
+    }
+  ]
+}
+
+GET _cat/aliases
+
+
+#Alias 2: The alias othello should filter documents, where the play_name.keyword field is "Othello" and be applied to the shakespeare index.
+
+POST _aliases
+{
+  "actions": [
+    {
+      "add": {
+        "index": "shakespeare",
+          "filter": {
+            "term": {
+              "play_name.keyword": "Othello"
+            }
+          }, 
+        "alias": "othello"
+      }
+    }
+  ]
+}
+
+
+GET othello/_search
+{}
+
+
+#Alias 3:
+
+#-The component template sample_data should be configured to apply the sample_data alias.
+#-The sample_data_bank index template should match any index that starts with "accounts-".
+#-The sample_data_bank index template should be composed of the sample_data component template.
+#-The sample_data_bank index template should also include the bank alias.
+#-The sample_data_bank index template should be configured to create indices with one primary and zero replica shards.
+
+PUT _component_template/sample_data
+{
+  "template": {
+    "aliases": {
+    "sample_data": {}
+  } 
+  }
+}
+
+PUT _index_template/sample_data_bank
+{
+  "index_patterns": ["accounts-*"],
+  "composed_of": ["sample_data"],
+  "template":{
+    "aliases":{
+      "bank":{}
+    },
+    "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  }
+  }
+}
+
+GET _index_template/sample_data_bank
